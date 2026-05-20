@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne+Mono&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --ink: #1a1a1a;
+  --ink-light: #6b6460;
+  --ink-faint: #bbb5ae;
+  --line: #e8e3db;
+  --gold: #b5843a;
+  --gold-bg: #fdf6e8;
+  --blue: #3a6b8a;
+  --blue-bg: #eef4f8;
+  --green: #3a7a5a;
+  --green-bg: #eef6f1;
+  --rose: #8a3a4a;
+  --rose-bg: #f8eef0;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* NAV TABS */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 0 20px;
+}
+
+.nav-tab {
+  padding: 16px 20px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-light);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-family: 'Syne', sans-serif;
+}
+
+.nav-tab:hover { color: var(--ink); }
+.nav-tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* PAGES */
+.page { display: none; max-width: 680px; margin: 0 auto; padding: 32px 20px 80px; }
+.page.active { display: block; }
+
+/* GREETING */
+.greeting {
+  margin-bottom: 32px;
+  animation: rise 0.5s ease both;
+}
+
+.greeting-date {
+  font-family: 'Syne Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.greeting-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.greeting-title em { font-style: italic; color: var(--gold); }
+
+/* SECTION LABEL */
+.sec-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 12px;
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-label::after { content:''; flex:1; height:1px; background:var(--line); }
+
+/* DAILY TASKS — SIMPLIFIED */
+.task-group {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  animation: rise 0.4s ease both;
+}
+
+.task-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tg-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tg-name {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  flex: 1;
+}
+
+.tg-count {
+  font-family: 'Syne Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.task-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.task-item:last-child { border-bottom: none; }
+.task-item:hover { background: #fafaf8; }
+.task-item.done { opacity: 0.45; }
+
+.task-cb {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  transition: all 0.15s;
+}
+
+.task-item.done .task-cb {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: white;
+}
+
+.task-body { flex: 1; }
+.task-name { font-size: 13px; line-height: 1.5; color: var(--ink); }
+.task-item.done .task-name { text-decoration: line-through; }
+.task-note { font-size: 11px; color: var(--ink-light); margin-top: 2px; line-height: 1.4; }
+
+.task-tag {
+  font-family: 'Syne Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* Daily progress bar */
+.day-progress-wrap {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+  animation: rise 0.3s ease both;
+}
+
+.dp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.dp-label { font-size: 12px; color: var(--ink-light); }
+.dp-num { font-family: 'Syne Mono', monospace; font-size: 13px; color: var(--ink); }
+
+.dp-bar { height: 4px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.dp-fill { height: 100%; background: var(--ink); border-radius: 4px; width: 0%; transition: width 0.4s ease; }
+
+.dp-msg { font-size: 11px; color: var(--ink-faint); margin-top: 8px; font-style: italic; }
+
+/* INTENTION BOX */
+.intention-box {
+  background: var(--gold-bg);
+  border: 1px solid rgba(181,132,58,0.2);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  animation: rise 0.35s ease both;
+}
+
+.ib-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+
+.ib-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--ink);
+  resize: none;
+  line-height: 1.6;
+}
+
+.ib-input::placeholder { color: var(--ink-faint); }
+
+/* REFLECTION */
+.reflection-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+
+.rb-q { font-size: 12px; color: var(--ink-light); margin-bottom: 7px; }
+
+.rb-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  outline: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--ink);
+  resize: none;
+  line-height: 1.6;
+  padding: 10px 12px;
+  transition: border-color 0.2s;
+}
+
+.rb-input:focus { border-color: var(--ink-faint); }
+
+/* WEEKLY PAGE */
+.week-anchor {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  animation: rise 0.4s ease both;
+}
+
+.wa-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.wa-icon { font-size: 20px; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+.wa-pillar { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
+.wa-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 400; color: var(--ink); }
+
+.wa-goals { display: flex; flex-direction: column; gap: 8px; }
+
+.wa-goal {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.wa-goal:hover { background: #f0ede8; }
+.wa-goal.done { opacity: 0.4; }
+.wa-goal.done .wa-goal-text { text-decoration: line-through; }
+
+.wa-check {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  transition: all 0.15s;
+}
+
+.wa-goal.done .wa-check { background: var(--ink); border-color: var(--ink); color: white; }
+.wa-goal-text { font-size: 13px; line-height: 1.5; }
+
+/* Weekly review */
+.week-review {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+
+.wr-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; margin-bottom: 16px; }
+
+.wr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 500px) { .wr-grid { grid-template-columns: 1fr; } }
+
+.wr-item { }
+.wr-q { font-size: 11px; color: var(--ink-light); margin-bottom: 6px; letter-spacing: 0.5px; }
+.wr-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  outline: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--ink);
+  resize: none;
+  line-height: 1.6;
+  padding: 9px 11px;
+  transition: border-color 0.2s;
+  height: 72px;
+}
+.wr-input:focus { border-color: var(--ink-faint); }
+
+/* MONTHLY PAGE */
+.month-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  animation: rise 0.4s ease both;
+}
+
+.mc-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mc-color {
+  width: 4px;
+  height: 40px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.mc-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
+.mc-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; }
+
+.mc-weeks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+@media (max-width: 480px) { .mc-weeks { grid-template-columns: repeat(2,1fr); } }
+
+.mc-week {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+  background: var(--bg);
+}
+
+.mc-wk-num { font-family: 'Syne Mono', monospace; font-size: 9px; color: var(--ink-faint); margin-bottom: 5px; letter-spacing: 1px; }
+.mc-wk-text { font-size: 11px; line-height: 1.5; color: var(--ink); }
+
+.mc-outcome {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--ink-light);
+  font-style: italic;
+}
+
+.mc-outcome-icon { font-size: 14px; flex-shrink: 0; }
+
+/* Monthly habit grid */
+.habit-grid-wrap {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+
+.hg-title { font-size: 12px; color: var(--ink); font-weight: 600; margin-bottom: 14px; }
+
+.habit-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.habit-name { font-size: 11px; color: var(--ink-light); width: 120px; flex-shrink: 0; }
+.habit-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.h-dot {
+  width: 13px; height: 13px;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.h-dot:hover { border-color: var(--ink-faint); }
+
+/* QUARTERLY PAGE */
+.quarter-vision {
+  background: var(--ink);
+  color: white;
+  border-radius: 8px;
+  padding: 28px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  animation: rise 0.4s ease both;
+}
+
+.quarter-vision::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 80% 20%, rgba(181,132,58,0.15) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.qv-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 10px; }
+
+.qv-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-style: italic; font-weight: 300; color: rgba(255,255,255,0.9); line-height: 1.3; margin-bottom: 20px; }
+
+.qv-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  outline: none;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: rgba(255,255,255,0.85);
+  resize: none;
+  line-height: 1.7;
+  padding: 12px 14px;
+  transition: border-color 0.2s;
+  height: 80px;
+}
+
+.qv-input::placeholder { color: rgba(255,255,255,0.25); }
+.qv-input:focus { border-color: rgba(255,255,255,0.25); }
+
+.quarter-pillar-goals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 480px) { .quarter-pillar-goals { grid-template-columns: 1fr; } }
+
+.qpg {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  animation: rise 0.5s ease both;
+}
+
+.qpg-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.qpg-goal-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  outline: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  color: var(--ink);
+  resize: none;
+  line-height: 1.6;
+  padding: 8px 10px;
+  transition: border-color 0.2s;
+  height: 60px;
+  margin-bottom: 8px;
+}
+
+.qpg-goal-input:focus { border-color: var(--ink-faint); }
+.qpg-goal-input::placeholder { color: var(--ink-faint); }
+
+.qpg-measure { font-size: 10px; color: var(--ink-faint); margin-top: 4px; }
+.qpg-measure input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  outline: none;
+  font-family: 'Syne Mono', monospace;
+  font-size: 11px;
+  color: var(--ink);
+  padding: 4px 0;
+  margin-top: 4px;
+}
+
+/* ACCOUNTABILITY section */
+.acc-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  animation: rise 0.5s ease both;
+}
+
+.acc-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; margin-bottom: 4px; }
+.acc-sub { font-size: 11px; color: var(--ink-light); margin-bottom: 16px; }
+
+.acc-items { display: flex; flex-direction: column; gap: 10px; }
+
+.acc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+.acc-num {
+  font-family: 'Syne Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+  min-width: 20px;
+  margin-top: 1px;
+}
+
+.acc-text-wrap { flex: 1; }
+.acc-head { font-size: 13px; color: var(--ink); margin-bottom: 2px; font-weight: 600; }
+.acc-desc { font-size: 11px; color: var(--ink-light); line-height: 1.5; }
+
+/* STREAK */
+.streak-bar {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.streak-day {
+  width: 22px; height: 22px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne Mono', monospace;
+  font-size: 8px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.streak-day.done { background: var(--ink); border-color: var(--ink); color: white; }
+.streak-day:hover { border-color: var(--ink-faint); }
+
+/* SAVE BUTTON */
+.save-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--ink);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 200;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.save-btn:hover { background: #333; transform: translateY(-1px); }
+.save-btn:active { transform: translateY(0); }
+.save-btn.saved { background: var(--green); }
+
+/* Animations */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Color utils */
+.c-gold { color: var(--gold); }
+.c-blue { color: var(--blue); }
+.c-green { color: var(--green); }
+.c-rose { color: var(--rose); }
+.bg-gold { background: var(--gold); }
+.bg-blue { background: var(--blue); }
+.bg-green { background: var(--green); }
+.bg-rose { background: var(--rose); }
+.border-gold { border-color: rgba(181,132,58,0.3); }
+.border-blue { border-color: rgba(58,107,138,0.3); }
+.border-green { border-color: rgba(58,122,90,0.3); }
+.border-rose { border-color: rgba(138,58,74,0.3); }
+
+.tag-gold { background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(181,132,58,0.2); }
+.tag-blue { background: var(--blue-bg); color: var(--blue); border: 1px solid rgba(58,107,138,0.2); }
+.tag-green { background: var(--green-bg); color: var(--green); border: 1px solid rgba(58,122,90,0.2); }
+.tag-rose { background: var(--rose-bg); color: var(--rose); border: 1px solid rgba(138,58,74,0.2); }
+
+/* Divider */
+hr.soft { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+
+/* Momentum score */
+.momentum {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow);
+}
+
+.momentum-score {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 48px;
+  font-weight: 300;
+  color: var(--ink);
+  line-height: 1;
+  min-width: 64px;
+}
+
+.momentum-right { flex: 1; }
+.momentum-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 4px; }
+.momentum-desc { font-size: 12px; color: var(--ink-light); line-height: 1.5; }
+
+.momentum-bar-wrap { height: 3px; background: var(--line); border-radius: 3px; margin-top: 10px; overflow: hidden; }
+.momentum-bar { height: 100%; background: var(--gold); border-radius: 3px; transition: width 0.5s ease; }
+
+/* Business Log */
+.biz-log-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 10px; box-shadow: var(--shadow); }
+.biz-log-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--blue-bg); }
+.biz-log-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; color: var(--blue); }
+.biz-log-hint { font-size: 10px; color: var(--blue); opacity: 0.6; }
+.biz-log-today { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); align-items: flex-start; }
+.biz-log-today-label { font-family: 'Syne Mono', monospace; font-size: 10px; color: var(--blue); white-space: nowrap; padding-top: 3px; min-width: 44px; }
+.biz-log-input { flex: 1; background: transparent; border: none; outline: none; font-family: 'Syne', sans-serif; font-size: 13px; color: var(--ink); resize: none; line-height: 1.6; min-height: 48px; }
+.biz-log-input::placeholder { color: var(--ink-faint); font-style: italic; }
+.biz-log-save { background: var(--blue); color: white; border: none; border-radius: 5px; padding: 6px 12px; font-family: 'Syne', sans-serif; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: background 0.2s; }
+.biz-log-save:hover { background: #2d5570; }
+.biz-log-history { max-height: 200px; overflow-y: auto; }
+.biz-log-day { display: flex; gap: 12px; padding: 9px 16px; border-bottom: 1px solid var(--line); font-size: 12px; }
+.biz-log-day:last-child { border-bottom: none; }
+.biz-log-date { font-family: 'Syne Mono', monospace; font-size: 10px; color: var(--ink-faint); white-space: nowrap; padding-top: 2px; min-width: 52px; }
+.biz-log-entry { color: var(--ink-light); line-height: 1.5; flex: 1; }
+.biz-log-empty { padding: 14px 16px; font-size: 11px; color: var(--ink-faint); font-style: italic; text-align: center; }
+
+/* Reset notice */
+.reset-notice { background: var(--green-bg); border: 1px solid rgba(58,122,90,0.2); border-radius: 8px; padding: 10px 14px; font-size: 11px; color: var(--green); margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-tab active" onclick="showPage('daily')">Today</button>
+  <button class="nav-tab" onclick="showPage('weekly')">Week</button>
+  <button class="nav-tab" onclick="showPage('monthly')">Month</button>
+  <button class="nav-tab" onclick="showPage('quarterly')">Quarter</button>
+</nav>
+
+<!-- ============ DAILY PAGE ============ -->
+<div class="page active" id="page-daily">
+
+  <div class="greeting">
+    <div class="greeting-date" id="today-date"></div>
+    <div class="greeting-title">Today I build<br>the life I <em>intend.</em></div>
+  </div>
+
+  <!-- Reset notice -->
+  <div class="reset-notice" id="reset-notice">✓ New day — tasks reset automatically. Yesterday's reflections are saved in history.</div>
+
+  <!-- Intention -->
+  <div class="sec-label">Morning Intention</div>
+  <div class="intention-box">
+    <div class="ib-label">Today I will focus on —</div>
+    <textarea class="ib-input" id="intention" rows="2" placeholder="Write your one intention for today..."></textarea>
+  </div>
+
+  <!-- Progress -->
+  <div class="day-progress-wrap">
+    <div class="dp-top">
+      <div class="dp-label">Daily Progress</div>
+      <div class="dp-num" id="dp-text">0 / 9 done</div>
+    </div>
+    <div class="dp-bar"><div class="dp-fill" id="dp-fill"></div></div>
+    <div class="dp-msg" id="dp-msg">Start your day. Every task counts.</div>
+  </div>
+
+  <!-- TASKS -->
+  <div class="sec-label">Daily Tasks</div>
+
+  <!-- Quran -->
+  <div class="task-group" style="animation-delay:0.05s">
+    <div class="task-group-header">
+      <div class="tg-dot bg-gold"></div>
+      <div class="tg-name c-gold">Quran & Purpose</div>
+      <div class="tg-count" id="cnt-1">0/2</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'g1')" data-group="g1">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">Quran — read 1 page, write 1 lesson in journal</div>
+        <div class="task-note">After Fajr. No phone before this.</div>
+      </div>
+      <div class="task-tag tag-gold">Fajr</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'g1')" data-group="g1">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">Seerah / Tafseer — 30 min lecture, take notes</div>
+        <div class="task-note">Link what you hear to today's ayah.</div>
+      </div>
+      <div class="task-tag tag-gold">Morning</div>
+    </div>
+  </div>
+
+  <!-- Business -->
+  <div class="task-group" style="animation-delay:0.1s">
+    <div class="task-group-header">
+      <div class="tg-dot bg-blue"></div>
+      <div class="tg-name c-blue">AI Business</div>
+      <div class="tg-count" id="cnt-2">0/2</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'g2')" data-group="g2">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">1 hour — Make.com / market research / outreach</div>
+        <div class="task-note">One task only. No switching. Deep focus block.</div>
+      </div>
+      <div class="task-tag tag-blue">08:00</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'g2')" data-group="g2">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">Write today's business action in your log</div>
+        <div class="task-note">What did you learn or do? One sentence is enough.</div>
+      </div>
+      <div class="task-tag tag-blue">After</div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="task-group" style="animation-delay:0.15s">
+    <div class="task-group-header">
+      <div class="tg-dot bg-gold"></div>
+      <div class="tg-name c-gold">Content</div>
+      <div class="tg-count" id="cnt-3">0/1</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'g3')" data-group="g3">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">Write 1 content piece from today's Quran lesson</div>
+        <div class="task-note">Caption, short post, or draft. Even 3 lines counts.</div>
+      </div>
+      <div class="task-tag tag-gold">Afternoon</div>
+    </div>
+  </div>
+
+  <!-- Communication -->
+  <div class="task-group" style="animation-delay:0.18s">
+    <div class="task-group-header">
+      <div class="tg-dot bg-rose"></div>
+      <div class="tg-name c-rose">Communication Skill</div>
+      <div class="tg-count" id="cnt-comm">0/1</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'gcomm')" data-group="gcomm">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">30 min — study communication (writing or speaking)</div>
+        <div class="task-note">Read, watch, or practice. Apply what you learn to your content or outreach the same day.</div>
+      </div>
+      <div class="task-tag tag-rose">Afternoon</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="task-group" style="animation-delay:0.2s">
+    <div class="task-group-header">
+      <div class="tg-dot bg-green"></div>
+      <div class="tg-name c-green">Body & Mind</div>
+      <div class="tg-count" id="cnt-4">0/2</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'g4')" data-group="g4">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">Exercise — 20 min minimum. Move your body.</div>
+        <div class="task-note">Walk, stretching, bodyweight. No excuses.</div>
+      </div>
+      <div class="task-tag tag-green">Morning</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'g4')" data-group="g4">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">No sugar today. Drink water first thing.</div>
+        <div class="task-note">What you eat affects how you think and feel.</div>
+      </div>
+      <div class="task-tag tag-green">All day</div>
+    </div>
+  </div>
+
+  <!-- Night review -->
+  <div class="task-group" style="animation-delay:0.25s">
+    <div class="task-group-header">
+      <div class="tg-dot bg-rose"></div>
+      <div class="tg-name c-rose">Night Review</div>
+      <div class="tg-count" id="cnt-5">0/1</div>
+    </div>
+    <div class="task-item" onclick="toggleTask(this,'g5')" data-group="g5">
+      <div class="task-cb">✓</div>
+      <div class="task-body">
+        <div class="task-name">Write 3 lines — did, felt, do differently</div>
+        <div class="task-note">Lights out by 11pm. Phone away from bed.</div>
+      </div>
+      <div class="task-tag tag-rose">Night</div>
+    </div>
+  </div>
+
+  <!-- Business Log -->
+  <div class="sec-label">Business Log</div>
+  <div class="biz-log-wrap">
+    <div class="biz-log-header">
+      <div class="biz-log-title">⬡ Daily Log</div>
+      <div class="biz-log-hint">One line. What did you do or learn today?</div>
+    </div>
+    <div class="biz-log-today">
+      <div class="biz-log-today-label" id="log-today-date">Today</div>
+      <textarea class="biz-log-input" id="biz-log-input" rows="2" placeholder="e.g. Learned Make.com triggers. Built my first automation — form to email. It worked."></textarea>
+      <button class="biz-log-save" onclick="saveBizLog()">Save</button>
+    </div>
+    <div class="biz-log-history" id="biz-log-history">
+      <div class="biz-log-empty" id="biz-log-empty">No entries yet. Start today.</div>
+    </div>
+  </div>
+
+  <!-- Evening Reflection -->
+  <div class="sec-label">Evening Reflection</div>
+  <div class="reflection-box" style="margin-bottom:10px;">
+    <div class="rb-q">What did I actually do today?</div>
+    <textarea class="rb-input" id="ref-did" rows="2" placeholder="..."></textarea>
+  </div>
+  <div class="reflection-box" style="margin-bottom:10px;">
+    <div class="rb-q">One thing I'll do differently tomorrow?</div>
+    <textarea class="rb-input" id="ref-diff" rows="2" placeholder="..."></textarea>
+  </div>
+  <div class="reflection-box">
+    <div class="rb-q">Alhamdulillah for —</div>
+    <textarea class="rb-input" id="ref-grat" rows="2" placeholder="One thing you're grateful for today..."></textarea>
+  </div>
+
+</div>
+
+<!-- ============ WEEKLY PAGE ============ -->
+<div class="page" id="page-weekly">
+
+  <div class="greeting">
+    <div class="greeting-date" id="week-label"></div>
+    <div class="greeting-title">This week's<br><em>anchors.</em></div>
+  </div>
+
+  <div class="sec-label">Weekly Goals — One Per Pillar</div>
+
+  <div class="week-anchor" style="animation-delay:0.05s">
+    <div class="wa-top">
+      <div class="wa-icon">☽</div>
+      <div>
+        <div class="wa-pillar c-gold">Quran & Content</div>
+        <div class="wa-title">This week I will —</div>
+      </div>
+    </div>
+    <div class="wa-goals" id="wg-quran">
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Complete 7 days of Quran + journaling without a break</div>
+      </div>
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Listen to 5 Seerah lectures and link each to an ayah</div>
+      </div>
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Write and post at least 2 content pieces</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="week-anchor" style="animation-delay:0.1s">
+    <div class="wa-top">
+      <div class="wa-icon">⬡</div>
+      <div>
+        <div class="wa-pillar c-blue">AI Business</div>
+        <div class="wa-title">This week I will —</div>
+      </div>
+    </div>
+    <div class="wa-goals">
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Complete 5 hours of focused Make.com / outreach work</div>
+      </div>
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Write daily business log every single day</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="week-anchor" style="animation-delay:0.15s">
+    <div class="wa-top">
+      <div class="wa-icon">◈</div>
+      <div>
+        <div class="wa-pillar c-green">Personality</div>
+        <div class="wa-title">This week I will —</div>
+      </div>
+    </div>
+    <div class="wa-goals">
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Exercise every day — even 10 minutes on hard days</div>
+      </div>
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Sleep by 11pm at least 5 nights out of 7</div>
+      </div>
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Zero sugar for 5 days this week</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="week-anchor" style="animation-delay:0.2s">
+    <div class="wa-top">
+      <div class="wa-icon">◎</div>
+      <div>
+        <div class="wa-pillar c-rose">Knowledge</div>
+        <div class="wa-title">This week I will —</div>
+      </div>
+    </div>
+    <div class="wa-goals">
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Study communication — 1 resource, 45 min session</div>
+      </div>
+      <div class="wa-goal" onclick="toggleWGoal(this)">
+        <div class="wa-check">✓</div>
+        <div class="wa-goal-text">Apply one new concept from knowledge study in real life</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Review -->
+  <div class="sec-label">Weekly Review — Every Sunday</div>
+  <div class="week-review">
+    <div class="wr-title">End of Week Reflection</div>
+    <div class="wr-grid">
+      <div class="wr-item">
+        <div class="wr-q">What went well this week?</div>
+        <textarea class="wr-input" id="wr-well" placeholder="..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">Where did I fall short?</div>
+        <textarea class="wr-input" id="wr-short" placeholder="..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">What lesson did the Quran teach me?</div>
+        <textarea class="wr-input" id="wr-quran" placeholder="..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">My one focus next week?</div>
+        <textarea class="wr-input" id="wr-next" placeholder="..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Streak tracker -->
+  <div class="sec-label">Weekly Consistency Tracker</div>
+  <div class="habit-grid-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <button onclick="changeTrackerWeek(-1)" style="background:none;border:1px solid var(--line);border-radius:5px;padding:5px 12px;font-family:'Syne',sans-serif;font-size:11px;color:var(--ink-light);cursor:pointer;">← Prev</button>
+      <div id="tracker-week-label" style="font-size:12px;font-weight:600;color:var(--ink);letter-spacing:1px;"></div>
+      <button onclick="changeTrackerWeek(1)" id="tracker-week-next-btn" style="background:none;border:1px solid var(--line);border-radius:5px;padding:5px 12px;font-family:'Syne',sans-serif;font-size:11px;color:var(--ink-light);cursor:pointer;">Next →</button>
+    </div>
+    <div class="habit-row">
+      <div class="habit-name c-gold">Quran daily</div>
+      <div class="streak-bar" id="streak-quran"></div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-name c-blue">Business 1hr</div>
+      <div class="streak-bar" id="streak-biz"></div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-name c-green">Exercise</div>
+      <div class="streak-bar" id="streak-ex"></div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-name c-rose">Sleep 11pm</div>
+      <div class="streak-bar" id="streak-sleep"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ MONTHLY PAGE ============ -->
+<div class="page" id="page-monthly">
+
+  <div class="greeting">
+    <div class="greeting-date" id="month-label"></div>
+    <div class="greeting-title">Month by<br><em>month.</em></div>
+  </div>
+
+  <!-- Momentum score -->
+  <div class="momentum">
+    <div class="momentum-score" id="mom-score">—</div>
+    <div class="momentum-right">
+      <div class="momentum-label">Momentum Score</div>
+      <div class="momentum-desc">Based on habit completions this month. Tap dots in the tracker below to update.</div>
+      <div class="momentum-bar-wrap"><div class="momentum-bar" id="mom-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="sec-label">Monthly Milestones</div>
+
+  <!-- Month milestone navigator -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <button onclick="changeMilestoneMonth(-1)" style="background:none;border:1px solid var(--line);border-radius:5px;padding:5px 12px;font-family:'Syne',sans-serif;font-size:11px;color:var(--ink-light);cursor:pointer;">← Prev</button>
+    <div id="milestone-month-label" style="font-size:12px;font-weight:600;color:var(--ink);letter-spacing:1px;"></div>
+    <button onclick="changeMilestoneMonth(1)" id="milestone-next-btn" style="background:none;border:1px solid var(--line);border-radius:5px;padding:5px 12px;font-family:'Syne',sans-serif;font-size:11px;color:var(--ink-light);cursor:pointer;">Next →</button>
+  </div>
+
+  <div id="milestone-cards"></div>
+
+  <!-- Monthly habit dots -->
+  <div class="sec-label">30-Day Habit Tracker</div>
+  <div class="habit-grid-wrap">
+    <!-- Month navigator -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <button onclick="changeTrackerMonth(-1)" style="background:none;border:1px solid var(--line);border-radius:5px;padding:5px 12px;font-family:'Syne',sans-serif;font-size:11px;color:var(--ink-light);cursor:pointer;">← Prev</button>
+      <div id="tracker-month-label" style="font-size:12px;font-weight:600;color:var(--ink);letter-spacing:1px;"></div>
+      <button onclick="changeTrackerMonth(1)" id="tracker-next-btn" style="background:none;border:1px solid var(--line);border-radius:5px;padding:5px 12px;font-family:'Syne',sans-serif;font-size:11px;color:var(--ink-light);cursor:pointer;">Next →</button>
+    </div>
+    <div class="habit-row">
+      <div class="habit-name c-gold">Quran daily</div>
+      <div class="habit-dots" id="mh-quran"></div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-name c-blue">Business 1hr</div>
+      <div class="habit-dots" id="mh-biz"></div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-name c-green">Exercise</div>
+      <div class="habit-dots" id="mh-ex"></div>
+    </div>
+    <div class="habit-row">
+      <div class="habit-name c-rose">Sleep 11pm</div>
+      <div class="habit-dots" id="mh-sleep"></div>
+    </div>
+  </div>
+
+  <!-- Monthly review -->
+  <div class="sec-label">Monthly Review — Last Day of Month</div>
+  <div class="week-review">
+    <div class="wr-title">Month in Review</div>
+    <div class="wr-grid">
+      <div class="wr-item">
+        <div class="wr-q">Biggest win this month?</div>
+        <textarea class="wr-input" id="mr-win" placeholder="..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">Biggest gap — what didn't I do?</div>
+        <textarea class="wr-input" id="mr-gap" placeholder="..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">How has my character changed?</div>
+        <textarea class="wr-input" id="mr-char" placeholder="..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">My single focus next month?</div>
+        <textarea class="wr-input" id="mr-next" placeholder="..."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ QUARTERLY PAGE ============ -->
+<div class="page" id="page-quarterly">
+
+  <div class="greeting">
+    <div class="greeting-date" id="quarter-label"></div>
+    <div class="greeting-title">The bigger<br><em>picture.</em></div>
+  </div>
+
+  <!-- Vision -->
+  <div class="quarter-vision">
+    <div class="qv-label">90-Day Vision</div>
+    <div class="qv-title">In 90 days, I want to be the person who —</div>
+    <textarea class="qv-input" id="q-vision" placeholder="Write your vision here. Be honest, be specific, be brave..."></textarea>
+  </div>
+
+  <!-- Per pillar quarterly goals -->
+  <div class="sec-label">Quarterly Goals — One Per Pillar</div>
+  <div class="quarter-pillar-goals">
+    <div class="qpg" style="animation-delay:0.1s">
+      <div class="qpg-label c-gold">☽ Quran & Content</div>
+      <textarea class="qpg-goal-input" id="qg-quran" placeholder="What does success look like after 90 days?"></textarea>
+      <div class="qpg-measure">How will I measure it?</div>
+      <input type="text" id="qm-quran" placeholder="e.g. 90 journal entries, 30 posts published">
+    </div>
+    <div class="qpg" style="animation-delay:0.15s">
+      <div class="qpg-label c-blue">⬡ AI Business</div>
+      <textarea class="qpg-goal-input" id="qg-biz" placeholder="What does success look like after 90 days?"></textarea>
+      <div class="qpg-measure">How will I measure it?</div>
+      <input type="text" id="qm-biz" placeholder="e.g. First $500 earned, 3 clients reached">
+    </div>
+    <div class="qpg" style="animation-delay:0.2s">
+      <div class="qpg-label c-green">◈ Personality</div>
+      <textarea class="qpg-goal-input" id="qg-pers" placeholder="What does success look like after 90 days?"></textarea>
+      <div class="qpg-measure">How will I measure it?</div>
+      <input type="text" id="qm-pers" placeholder="e.g. 80/90 days of exercise, feel the difference">
+    </div>
+    <div class="qpg" style="animation-delay:0.25s">
+      <div class="qpg-label c-rose">◎ Knowledge</div>
+      <textarea class="qpg-goal-input" id="qg-know" placeholder="What does success look like after 90 days?"></textarea>
+      <div class="qpg-measure">How will I measure it?</div>
+      <input type="text" id="qm-know" placeholder="e.g. Finished communication course, applied daily">
+    </div>
+  </div>
+
+  <!-- Accountability rules -->
+  <div class="sec-label">Accountability System</div>
+  <div class="acc-card" style="animation-delay:0.3s">
+    <div class="acc-title">Your Personal Rules</div>
+    <div class="acc-sub">These are non-negotiable. Not goals. Rules.</div>
+    <div class="acc-items">
+      <div class="acc-item">
+        <div class="acc-num">01</div>
+        <div class="acc-text-wrap">
+          <div class="acc-head">The 2-Day Rule</div>
+          <div class="acc-desc">You can miss a habit once. Never twice in a row. Missing twice is choosing to quit. One miss is human. Two is a pattern.</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-num">02</div>
+        <div class="acc-text-wrap">
+          <div class="acc-head">Sunday is Review Day</div>
+          <div class="acc-desc">Every Sunday, fill the weekly review. No skipping. If you don't review, you don't learn. You just repeat.</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-num">03</div>
+        <div class="acc-text-wrap">
+          <div class="acc-head">Quran Before Phone</div>
+          <div class="acc-desc">Every single morning. This one habit protects your intention for the whole day. Break this and the day starts reactive.</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-num">04</div>
+        <div class="acc-text-wrap">
+          <div class="acc-head">One Business Hour is Sacred</div>
+          <div class="acc-desc">One hour daily. Non-negotiable. Even on bad days. Even when you don't feel like it. Especially then.</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-num">05</div>
+        <div class="acc-text-wrap">
+          <div class="acc-head">Month-End Honest Audit</div>
+          <div class="acc-desc">Last day of every month: fill the monthly review with brutal honesty. What you measure you improve. What you ignore you repeat.</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-num">06</div>
+        <div class="acc-text-wrap">
+          <div class="acc-head">Niyyah First</div>
+          <div class="acc-desc">Before starting any work session — 10 seconds. What is this for? Allah. Your future. Your sadqa e jariyah. That's why it matters.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quarterly review -->
+  <div class="sec-label">Quarterly Review — Every 90 Days</div>
+  <div class="week-review">
+    <div class="wr-title">90-Day Audit</div>
+    <div class="wr-grid">
+      <div class="wr-item">
+        <div class="wr-q">Did I become who I said I would?</div>
+        <textarea class="wr-input" id="qr-become" placeholder="Honest answer..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">What was my biggest obstacle?</div>
+        <textarea class="wr-input" id="qr-obstacle" placeholder="..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">What habit changed my life most?</div>
+        <textarea class="wr-input" id="qr-habit" placeholder="..."></textarea>
+      </div>
+      <div class="wr-item">
+        <div class="wr-q">My vision for the next 90 days?</div>
+        <textarea class="wr-input" id="qr-next" placeholder="..."></textarea>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SAVE BUTTON -->
+<button class="save-btn" id="save-btn" onclick="saveAll()">Save</button>
+
+<script>
+// ---- DATES ----
+const now = new Date();
+const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+document.getElementById('today-date').textContent =
+  `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+// Week range
+const mon = new Date(now); mon.setDate(now.getDate() - ((now.getDay()+6)%7));
+const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+document.getElementById('week-label').textContent =
+  `Week of ${mon.getDate()} – ${sun.getDate()} ${months[now.getMonth()]}`;
+
+document.getElementById('month-label').textContent = `${months[now.getMonth()]} ${now.getFullYear()}`;
+
+const q = Math.ceil((now.getMonth()+1)/3);
+document.getElementById('quarter-label').textContent = `Q${q} · ${now.getFullYear()}`;
+
+// ---- PAGE NAV ----
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ---- TASK TOGGLE ----
+const groupCounts = { g1:2, g2:2, g3:1, gcomm:1, g4:2, g5:1 };
+const groupCountMap = { g1:'cnt-1', g2:'cnt-2', g3:'cnt-3', gcomm:'cnt-comm', g4:'cnt-4', g5:'cnt-5' };
+
+function toggleTask(el, group) {
+  el.classList.toggle('done');
+  updateGroupCount(group);
+  updateDayProgress();
+  saveAll(true);
+}
+
+function updateGroupCount(group) {
+  const items = document.querySelectorAll(`[data-group="${group}"]`);
+  const done = [...items].filter(i => i.classList.contains('done')).length;
+  document.getElementById(groupCountMap[group]).textContent = `${done}/${items.length}`;
+}
+
+function updateDayProgress() {
+  const all = document.querySelectorAll('.task-item');
+  const done = [...all].filter(i => i.classList.contains('done')).length;
+  const total = all.length;
+  const pct = Math.round((done/total)*100);
+  document.getElementById('dp-text').textContent = `${done} / ${total} done`;
+  document.getElementById('dp-fill').style.width = pct + '%';
+  const msgs = [
+    'Start your day. Every task counts.',
+    'Good start. Keep going.',
+    "You're building momentum.",
+    'More than halfway. Don\'t stop.',
+    'Almost there. Push through.',
+    'Every task done. Alhamdulillah.'
+  ];
+  const idx = Math.min(Math.floor(pct/20), 5);
+  document.getElementById('dp-msg').textContent = msgs[idx];
+}
+
+// ---- WEEKLY GOAL TOGGLE ----
+function toggleWGoal(el) {
+  el.classList.toggle('done');
+  saveAll(true);
+}
+
+// ---- WEEKLY STREAK TRACKER WITH NAVIGATOR ----
+const weekStreakIds = ['streak-quran','streak-biz','streak-ex','streak-sleep'];
+const wDays = ['M','T','W','T','F','S','S'];
+let weekOffset = 0; // 0 = this week, -1 = last week, etc.
+
+function getWeekKey(offset) {
+  const d = new Date(now);
+  // Go to Monday of current week
+  const dayOfWeek = (now.getDay() + 6) % 7; // Mon=0
+  d.setDate(now.getDate() - dayOfWeek + (offset * 7));
+  return d.toISOString().slice(0, 10); // "2026-05-18" = Monday of that week
+}
+
+function renderWeekTracker() {
+  const key = getWeekKey(weekOffset);
+  const isCurrentWeek = weekOffset === 0;
+
+  // Build week label: "18 – 24 May"
+  const mon = new Date(key);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const fmt = d => `${d.getDate()} ${months[d.getMonth()]}`;
+  document.getElementById('tracker-week-label').textContent = `${fmt(mon)} – ${fmt(sun)}`;
+
+  // Disable next if already on current week
+  const nextBtn = document.getElementById('tracker-week-next-btn');
+  nextBtn.style.opacity = isCurrentWeek ? '0.3' : '1';
+  nextBtn.style.pointerEvents = isCurrentWeek ? 'none' : 'auto';
+
+  weekStreakIds.forEach(id => {
+    const container = document.getElementById(id);
+    container.innerHTML = '';
+    const saveKey = 'ws-' + id + '-' + key;
+    const saved = JSON.parse(localStorage.getItem(saveKey) || '[]');
+
+    wDays.forEach((d, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'streak-day' + (saved[i] ? ' done' : '');
+      dot.textContent = d;
+      // Dim future days on current week
+      if (isCurrentWeek) {
+        const dayOfWeek = (now.getDay() + 6) % 7;
+        if (i > dayOfWeek) dot.style.opacity = '0.35';
+      }
+      dot.onclick = () => {
+        saved[i] = !saved[i];
+        dot.classList.toggle('done');
+        localStorage.setItem(saveKey, JSON.stringify(saved));
+      };
+      container.appendChild(dot);
+    });
+  });
+}
+
+function changeTrackerWeek(dir) {
+  const newOffset = weekOffset + dir;
+  if (newOffset > 0) return;
+  if (newOffset < -52) return;
+  weekOffset = newOffset;
+  renderWeekTracker();
+}
+
+renderWeekTracker();
+
+// ---- MONTHLY MILESTONE NAVIGATOR ----
+const milestoneData = {
+  1: { // Month 1
+    quran:  { w1:'Build the journaling habit. 7 days of Quran + notes. No posting pressure yet.', w2:'Start Seerah lectures. Draft your first 3 content pieces. Don\'t publish yet.', w3:'Publish your first post. Pick one topic: taqwa, akhlaq, or repentance.', w4:'3 posts published. Reflect on your voice. Build a content backlog.', outcome:'Consistent Quran journal + 3 published pieces. That\'s enough.' },
+    biz:    { w1:'Understand Make.com. Build 2 beginner automations by following tutorials.', w2:'Research market. Find 1 real pain point. Document it clearly.', w3:'Build a working demo for that pain point. Record a 60-sec screen video.', w4:'5 DMs per day. Goal: 1 real reply. One conversation. That\'s the win.', outcome:'Working demo + 1 interested conversation. No money yet — but the foundation is real.' },
+    pers:   { w1:'Start 11pm sleep rule. Track it. No excuses week one.', w2:'Add no-sugar rule. Remove it from one meal per day first.', w3:'Exercise daily is locked. Focus on response vs reaction this week.', w4:'All habits running together. Measure how you feel vs Day 1.', outcome:'Sleep + diet + exercise are habits. You feel the difference.' },
+    comm:   { w1:'Pick one communication resource — book, course, or channel. Start it.', w2:'Study 30 min daily. Finish at least 3 chapters or sessions.', w3:'Apply one concept directly to your content writing this week.', w4:'Apply one concept to your outreach DMs. See if responses improve.', outcome:'Communication study is a daily habit. First concepts applied in real work.' }
+  },
+  2: { // Month 2
+    quran:  { w1:'Journal daily without fail. Deepen reflection — go beyond summary, find personal lessons.', w2:'Post 3x this week. Experiment with format: short caption, carousel, or long reflection.', w3:'Identify your most resonant topic so far. Double down on it.', w4:'Build a 2-week content bank. Write ahead so you\'re never scrambling.', outcome:'Consistent posting rhythm. A content bank of 14+ pieces. Voice getting clearer.' },
+    biz:    { w1:'Follow up on Month 1 conversations. Send 5 fresh DMs daily.', w2:'Refine your demo based on any feedback you got. Make it sharper.', w3:'Aim for your first sales call or voice note conversation with a prospect.', w4:'Close your first client — even $50 or $100. First money changes everything.', outcome:'First dollar earned. Real client conversation had. Business is no longer theoretical.' },
+    pers:   { w1:'Sleep + exercise are non-negotiable now. No sugar 6/7 days minimum.', w2:'Focus: conscious response. Journal one moment per day where you chose to respond not react.', w3:'Audit your phone usage. Where is your attention going? Cut one time-wasting habit.', w4:'Energy audit: what activities drain you vs restore you? Protect the restoring ones.', outcome:'Body habits locked. Mental clarity improving. Reactions getting slower and more deliberate.' },
+    comm:   { w1:'Start second communication resource or go deeper into the first.', w2:'Write one DM or piece of content, then rewrite it to be 30% shorter. Practice tightening.', w3:'Practice explaining what you do (your business) in 2 clear sentences. Refine it.', w4:'Record a 60-sec voice note explaining your service. Listen back. Improve it.', outcome:'Writing is tighter. Able to explain the business clearly. Communication confidence growing.' }
+  },
+  3: { // Month 3
+    quran:  { w1:'90-day review: how has the Quran changed your thinking? Write a full journal entry.', w2:'Teach what you know. Write a post that explains a concept to someone starting from zero.', w3:'Explore a new topic in the Quran you haven\'t covered yet. Go deeper.', w4:'Plan next quarter\'s content direction. What themes will you build on?', outcome:'90 journal entries. 20+ posts. A real content brand forming with consistent voice.' },
+    biz:    { w1:'Deliver excellent work to your first client. Get a testimonial.', w2:'Use that testimonial in your next outreach. Social proof changes your conversion rate.', w3:'Raise your rate or expand your offer. Month 1 pricing was entry-level. Month 3 is not.', w4:'Reflect: what worked in your outreach? What failed? Refine the system for next quarter.', outcome:'Multiple client conversations. Real revenue. A repeatable system for getting clients.' },
+    pers:   { w1:'Physical: notice how you feel vs Month 1. Document it. This is your proof.', w2:'Mental: are you responding more than reacting? Identify one remaining trigger to work on.', w3:'Spiritual: how has the Quran practice shaped your character? Be honest.', w4:'Quarter-end audit: which habit impacted your life the most? Which one still needs work?', outcome:'A body and mind that is visibly different from 90 days ago. The habits are who you are now.' },
+    comm:   { w1:'Read back your earliest DMs and content. Compare to now. You\'ll see the growth.', w2:'Write a thread or long post — your longest piece yet. Stretch your range.', w3:'Study sales communication specifically: how to ask for the close without being pushy.', w4:'Quarter review: where did communication help you most — content, outreach, or conversations?', outcome:'Communication is a real skill now, not just a study subject. It\'s working in your business.' }
+  }
+};
+
+const pillarConfig = [
+  { key:'quran', color:'bg-gold', label:'c-gold', name:'Quran & Content' },
+  { key:'biz',   color:'bg-blue', label:'c-blue', name:'AI Business' },
+  { key:'pers',  color:'bg-green',label:'c-green',name:'Personality' },
+  { key:'comm',  color:'bg-rose', label:'c-rose', name:'Communication' }
+];
+
+let milestoneOffset = 0; // 0=month1, 1=month2, 2=month3
+
+function renderMilestones() {
+  // Determine which month number (1,2,3) to show
+  // milestoneOffset cycles: 0→Month1, 1→Month2, 2→Month3
+  const mNum = (milestoneOffset % 3) + 1;
+  const data = milestoneData[mNum];
+
+  document.getElementById('milestone-month-label').textContent = 'Month ' + mNum + ' of 3';
+
+  // Prev/next buttons
+  document.querySelector('#milestone-next-btn') && (document.getElementById('milestone-next-btn').style.opacity = milestoneOffset >= 2 ? '0.3' : '1');
+  document.getElementById('milestone-next-btn').style.pointerEvents = milestoneOffset >= 2 ? 'none' : 'auto';
+  document.querySelector('button[onclick="changeMilestoneMonth(-1)"]').style.opacity = milestoneOffset <= 0 ? '0.3' : '1';
+  document.querySelector('button[onclick="changeMilestoneMonth(-1)"]').style.pointerEvents = milestoneOffset <= 0 ? 'none' : 'auto';
+
+  const container = document.getElementById('milestone-cards');
+  container.innerHTML = '';
+
+  pillarConfig.forEach(p => {
+    const d = data[p.key];
+    const card = document.createElement('div');
+    card.className = 'month-card';
+    card.innerHTML = `
+      <div class="mc-header">
+        <div class="mc-color ${p.color}"></div>
+        <div>
+          <div class="mc-label ${p.label}">${p.name}</div>
+          <div class="mc-title">Month ${mNum} — 30-Day Targets</div>
+        </div>
+      </div>
+      <div class="mc-weeks">
+        <div class="mc-week"><div class="mc-wk-num">Week 1</div><div class="mc-wk-text">${d.w1}</div></div>
+        <div class="mc-week"><div class="mc-wk-num">Week 2</div><div class="mc-wk-text">${d.w2}</div></div>
+        <div class="mc-week"><div class="mc-wk-num">Week 3</div><div class="mc-wk-text">${d.w3}</div></div>
+        <div class="mc-week"><div class="mc-wk-num">Week 4</div><div class="mc-wk-text">${d.w4}</div></div>
+      </div>
+      <div class="mc-outcome"><div class="mc-outcome-icon">→</div><div>${d.outcome}</div></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function changeMilestoneMonth(dir) {
+  const next = milestoneOffset + dir;
+  if (next < 0 || next > 2) return;
+  milestoneOffset = next;
+  renderMilestones();
+}
+
+renderMilestones();
+
+// ---- MONTHLY HABIT TRACKER WITH NAVIGATOR ----
+const monthHabits = [
+  {id:'mh-quran', color:'#b5843a'},
+  {id:'mh-biz',   color:'#3a6b8a'},
+  {id:'mh-ex',    color:'#3a7a5a'},
+  {id:'mh-sleep', color:'#8a3a4a'}
+];
+
+// trackerOffset: 0 = current month, -1 = last month, -2 = two months ago
+let trackerOffset = 0;
+
+function getTrackerDate(offset) {
+  const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+  return d;
+}
+
+function getTrackerKey(offset) {
+  const d = getTrackerDate(offset);
+  return d.toISOString().slice(0, 7); // "2026-05"
+}
+
+function renderMonthTracker() {
+  const d = getTrackerDate(trackerOffset);
+  const key = getTrackerKey(trackerOffset);
+  const daysInM = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const isCurrentMonth = (trackerOffset === 0);
+  const todayDay = now.getDate();
+
+  // Update label
+  document.getElementById('tracker-month-label').textContent =
+    months[d.getMonth()] + ' ' + d.getFullYear();
+
+  // Disable Next if already on current month
+  const nextBtn = document.getElementById('tracker-next-btn');
+  nextBtn.style.opacity = isCurrentMonth ? '0.3' : '1';
+  nextBtn.style.pointerEvents = isCurrentMonth ? 'none' : 'auto';
+
+  // Rebuild dots for each habit
+  monthHabits.forEach(h => {
+    const container = document.getElementById(h.id);
+    container.innerHTML = '';
+    const saveKey = 'mh-' + h.id + '-' + key;
+    const saved = JSON.parse(localStorage.getItem(saveKey) || '[]');
+
+    for (let d2 = 0; d2 < daysInM; d2++) {
+      const dot = document.createElement('div');
+      dot.className = 'h-dot';
+      dot.title = `Day ${d2 + 1}`;
+      if (saved[d2]) dot.style.background = h.color;
+      // Dim future days on current month
+      if (isCurrentMonth && d2 + 1 > todayDay) dot.style.opacity = '0.35';
+      dot.onclick = () => {
+        saved[d2] = !saved[d2];
+        dot.style.background = saved[d2] ? h.color : 'transparent';
+        localStorage.setItem(saveKey, JSON.stringify(saved));
+        updateMomentum();
+      };
+      container.appendChild(dot);
+    }
+  });
+
+  updateMomentum();
+}
+
+function changeTrackerMonth(dir) {
+  const newOffset = trackerOffset + dir;
+  if (newOffset > 0) return; // can't go into future
+  if (newOffset < -11) return; // max 12 months back
+  trackerOffset = newOffset;
+  renderMonthTracker();
+}
+
+renderMonthTracker();
+
+function updateMomentum() {
+  const key = getTrackerKey(trackerOffset);
+  const d = getTrackerDate(trackerOffset);
+  const daysInM = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const isCurrentMonth = (trackerOffset === 0);
+  const countUpTo = isCurrentMonth ? now.getDate() : daysInM;
+
+  let done = 0;
+  const totalPossible = countUpTo * monthHabits.length;
+  monthHabits.forEach(h => {
+    const saveKey = 'mh-' + h.id + '-' + key;
+    const saved = JSON.parse(localStorage.getItem(saveKey) || '[]');
+    for (let i = 0; i < countUpTo; i++) {
+      if (saved[i]) done++;
+    }
+  });
+  const pct = totalPossible > 0 ? Math.round((done / totalPossible) * 100) : 0;
+  document.getElementById('mom-score').textContent = pct + '%';
+  document.getElementById('mom-bar').style.width = pct + '%';
+  document.getElementById('mom-score').textContent = pct + '%';
+}
+
+updateMomentum();
+
+// ---- SAVE / LOAD ----
+const textFields = [
+  'intention','ref-did','ref-diff','ref-grat',
+  'wr-well','wr-short','wr-quran','wr-next',
+  'mr-win','mr-gap','mr-char','mr-next',
+  'q-vision','qg-quran','qm-quran','qg-biz','qm-biz',
+  'qg-pers','qm-pers','qg-know','qm-know',
+  'qr-become','qr-obstacle','qr-habit','qr-next'
+];
+
+// Daily fields that reset each new day
+const dailyFields = ['intention','ref-did','ref-diff','ref-grat'];
+
+const todayKey = new Date().toISOString().slice(0,10); // e.g. "2026-05-19"
+
+function checkDailyReset() {
+  const lastDay = localStorage.getItem('last-open-date');
+  if (lastDay && lastDay !== todayKey) {
+    // New day — archive yesterday's daily fields then clear them
+    const archive = JSON.parse(localStorage.getItem('daily-archive') || '[]');
+    const entry = { date: lastDay };
+    dailyFields.forEach(id => {
+      entry[id] = localStorage.getItem('field-'+id) || '';
+    });
+    archive.unshift(entry); // newest first
+    if (archive.length > 90) archive.length = 90; // keep 90 days
+    localStorage.setItem('daily-archive', JSON.stringify(archive));
+
+    // Clear daily tasks
+    document.querySelectorAll('.task-item').forEach((el, i) => {
+      el.classList.remove('done');
+      localStorage.removeItem('task-'+i);
+    });
+
+    // Clear daily text fields
+    dailyFields.forEach(id => {
+      localStorage.removeItem('field-'+id);
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    // Clear today's biz log input (not history)
+    const bizInput = document.getElementById('biz-log-input');
+    if (bizInput) bizInput.value = '';
+    localStorage.removeItem('biz-log-today');
+
+    // Show reset notice
+    const notice = document.getElementById('reset-notice');
+    if (notice) notice.style.display = 'block';
+  }
+  localStorage.setItem('last-open-date', todayKey);
+}
+
+function loadAll() {
+  checkDailyReset();
+
+  textFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const val = localStorage.getItem('field-'+id);
+    if (val) el.value = val;
+  });
+
+  // Load task states
+  document.querySelectorAll('.task-item').forEach((el, i) => {
+    if (localStorage.getItem('task-'+i) === '1') el.classList.add('done');
+  });
+
+  // Load weekly goals
+  document.querySelectorAll('.wa-goal').forEach((el, i) => {
+    if (localStorage.getItem('wgoal-'+i) === '1') el.classList.add('done');
+  });
+
+  Object.keys(groupCounts).forEach(g => updateGroupCount(g));
+  updateDayProgress();
+  loadBizLog();
+}
+
+let saveTimeout;
+function saveAll(silent = false) {
+  textFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    localStorage.setItem('field-'+id, el.value);
+  });
+
+  document.querySelectorAll('.task-item').forEach((el, i) => {
+    localStorage.setItem('task-'+i, el.classList.contains('done') ? '1' : '0');
+  });
+
+  document.querySelectorAll('.wa-goal').forEach((el, i) => {
+    localStorage.setItem('wgoal-'+i, el.classList.contains('done') ? '1' : '0');
+  });
+
+  if (!silent) {
+    const btn = document.getElementById('save-btn');
+    btn.textContent = 'Saved ✓';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = 'Save'; btn.classList.remove('saved'); }, 1500);
+  }
+}
+
+// ---- BUSINESS LOG ----
+function loadBizLog() {
+  const dateEl = document.getElementById('log-today-date');
+  if (dateEl) dateEl.textContent = todayKey.slice(5).replace('-','/');
+
+  // Load today's draft
+  const draft = localStorage.getItem('biz-log-today') || '';
+  const input = document.getElementById('biz-log-input');
+  if (input && draft) input.value = draft;
+
+  // Auto-save draft as user types
+  if (input) {
+    input.addEventListener('input', () => {
+      localStorage.setItem('biz-log-today', input.value);
+    });
+  }
+
+  renderBizLogHistory();
+}
+
+function saveBizLog() {
+  const input = document.getElementById('biz-log-input');
+  if (!input || !input.value.trim()) return;
+
+  const logs = JSON.parse(localStorage.getItem('biz-log-history') || '[]');
+  // Remove existing entry for today if exists
+  const filtered = logs.filter(l => l.date !== todayKey);
+  filtered.unshift({ date: todayKey, entry: input.value.trim() });
+  if (filtered.length > 90) filtered.length = 90;
+  localStorage.setItem('biz-log-history', JSON.stringify(filtered));
+
+  const btn = document.querySelector('.biz-log-save');
+  if (btn) { btn.textContent = 'Saved ✓'; setTimeout(() => { btn.textContent = 'Save'; }, 1200); }
+
+  renderBizLogHistory();
+}
+
+function renderBizLogHistory() {
+  const container = document.getElementById('biz-log-history');
+  const empty = document.getElementById('biz-log-empty');
+  if (!container) return;
+
+  const logs = JSON.parse(localStorage.getItem('biz-log-history') || '[]');
+
+  // Remove old empty message
+  const oldEmpty = container.querySelector('.biz-log-empty');
+  if (oldEmpty) oldEmpty.remove();
+  // Remove old entries
+  container.querySelectorAll('.biz-log-day').forEach(el => el.remove());
+
+  if (logs.length === 0) {
+    const em = document.createElement('div');
+    em.className = 'biz-log-empty';
+    em.textContent = 'No entries yet. Start today.';
+    container.appendChild(em);
+    return;
+  }
+
+  logs.forEach(log => {
+    const row = document.createElement('div');
+    row.className = 'biz-log-day';
+    row.innerHTML = `<div class="biz-log-date">${log.date.slice(5).replace('-','/')}</div><div class="biz-log-entry">${log.entry}</div>`;
+    container.appendChild(row);
+  });
+}
+
+// Auto-save on input
+document.addEventListener('input', () => saveAll(true));
+
+loadAll();
+</script>
+</body>
+</html>
